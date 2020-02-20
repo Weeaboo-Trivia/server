@@ -24,8 +24,13 @@ io.on('connection', (socket) => {
 
   socket.on('joinRoom', (payload) => {
     socket.join(payload.id, () => {
-      io.to(payload.id).emit('someoneJoined', payload)
+      socket.broadcast.to(payload.id).emit('someoneJoined', payload)
+      socket.emit('enteredRoom', payload)
     })
+  })
+
+  socket.on('syncPlayers', (roomData) => {
+    io.to(roomData.id).emit('syncRoomData', roomData)
   })
 })
 http.listen(3000, () => {
