@@ -49,14 +49,26 @@ io.on('connection', (socket) => {
     })
       .then(({ data }) => {
         console.log(data)
-        io.to(payload.id).emit('showQuestions', data)
+        let results = data.results
+        results.forEach(result => {
+          let answers = result.incorrect_answers
+          answers.push(result.correct_answer)
+          result.answers = answers
+        })
+        io.to(payload.id).emit('showQuestions', results)
       })
       .catch(({ response }) => {
         console.log(response)
       })
   })
-  
 
+  socket.on('pushAddPoint', (payload) => {
+    socket.broadcast.to(payload.id).emit('addOpponentPoint', payload)
+  })
+  
+  socket.on('endGame', (payload) => {
+    io.to(payload.id).emit('endGame')
+  })
 })
 http.listen(3000, () => {
   console.log('connect to 3000')
